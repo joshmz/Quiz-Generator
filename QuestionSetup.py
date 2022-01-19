@@ -48,7 +48,7 @@ class MakeTF(MakeQuestion):
 
     def true_or_false(self):
         self.answer = input("Is your statement True or False? ")
-        # make GUI for choice
+        # make GUI for choices
         self.options=["True","False"]
 
 

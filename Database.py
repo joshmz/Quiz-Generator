@@ -11,11 +11,12 @@ module_table = """CREATE TABLE IF NOT EXISTS modules (
                     moduleDesc TEXT)"""
 
 question_table = """CREATE TABLE IF NOT EXISTS questions (
-                    question_ID INTEGER PRIMARY KEY,
+                    question_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                     module INTEGER,
+                    qType INTEGER,
                     question TEXT,
                     answer TEXT,
-                    options BLOB,
+                    options TEXT,
                     FOREIGN KEY(module) REFERENCES modules (moduleName))"""
 
 cursor.execute(module_table)

@@ -13,13 +13,16 @@ class MakeQuestion:
         self.answer = answer
         self.options = [answer]
 
-    def insert_data(self):
+    def insert_data(self,qType):
+        optStr = ','.join(self.options)
         question = [
-            str(db.moduleNamesList[self.module - 1]),
+            str(*db.moduleNamesList[self.module - 1]),
+            qType,
             self.question,
-            self.answer
+            self.answer,
+            optStr
         ]
-        db.cursor.execute('INSERT INTO questions (module, question, answer) VALUES (?,?,?)', question)
+        db.cursor.execute('INSERT INTO questions (module, qType, question, answer, options) VALUES (?,?,?,?,?)', question)
         db.conn.commit()
 
 
@@ -46,20 +49,17 @@ class MakeTF(MakeQuestion):
     def true_or_false(self):
         self.answer = input("Is your statement True or False? ")
         # make GUI for choice
-        if self.answer == "True":
-            self.options.append("False")
-        else:
-            self.options.append("True")
+        self.options=["True","False"]
 
 
-
-
-class MakeBM:
-    def __init__(self, type, terms, definitions, max_terms):
+class MakeBM(MakeQuestion):
+    def __init__(self, module, type, matches, maxTerms):
+        super(MakeBM,self).__init__(module, None, None, None, None)
         self.type = type
+        self.matches = []
         self.terms = []
         self.definitions = []
-        self.maxTerms = max_terms
+        self.maxTerms = maxTerms
 
     def make_match(self):
         self.maxTerms = int(input("How many terms would you like to create? "))
@@ -68,6 +68,21 @@ class MakeBM:
             definition = input("Enter its definition: ")
             self.terms.append(term)
             self.definitions.append(definition)
+        self.matches = (list(zip(self.terms,self.definitions)))
+        print (self.matches[0])
+        
+    def insert_data(self):
+        termsStr = ','.join(self.terms)
+        defStr = ','.join(self.definitions)
+        question=[
+            str(*db.moduleNamesList[self.module - 1]),
+            "3",
+            termsStr,
+            defStr,
+            "Null"
+        ]
+        db.cursor.execute('INSERT INTO questions (module, qType, question, answer, options) VALUES (?,?,?,?,?)', question)
+        db.conn.commit()
 
 
 # Allow user to pick a question type
@@ -75,7 +90,7 @@ def choose_question_type():
     module_check = True
     while module_check:
         for i in db.moduleList:
-            print(i)
+            print(*i)
         module_input = int(input(f"Enter module number: [1-{len(db.moduleList)}]: "))
         module_check = False
     type_check2 = True
@@ -99,22 +114,23 @@ def choose_question_type():
         question_input = input("Enter a statement: ")
         true_false(module_input, question_input)
     elif type_input == 3:
-        best_match()
+        best_match(module_input)
 
 
 def multiple_choice(module, question, answer):
     question_instance = MakeMCQ(module, 1, question, answer, None, None)  # Instantiation
     question_instance.make_dummy_answer()
     print(f'this question is for {db.moduleNamesList[question_instance.module - 1]}')
-    question_instance.insert_data()
+    question_instance.insert_data(1)
 
 def true_false(module, question):
     question_instance = MakeTF(module, 2, question, None, None)  # Instantiation
     question_instance.true_or_false()
     print(f'this question is for {db.moduleNamesList[question_instance.module - 1]}')
-    question_instance.insert_data()
+    question_instance.insert_data(2)
 
 
-def best_match():
-    question_instance = MakeBM(3, None, None, None)
+def best_match(module):
+    question_instance = MakeBM(module, 3, None, None)
     question_instance.make_match()
+    question_instance.insert_data()

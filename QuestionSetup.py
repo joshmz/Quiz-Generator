@@ -6,31 +6,35 @@ questionTypes = ["Multiple Choice", "True/False", "Best Match"]
 
 # Main parent class
 class MakeQuestion:
-    def __init__(self, module, type, question, answer, options):
+    def __init__(self, module, type, question, answer, options, feedback, wrong_count):
         self.module = module
         self.type = type
         self.question = question
         self.answer = answer
         self.options = [answer]
+        self.feedback = feedback
+        self.wrong_count = 0
 
+    # Inserting data into database
     def insert_data(self,qType):
-        optStr = ','.join(self.options)
+        optStr = ','.join(self.options) # Clean up string
         question = [
             str(*db.moduleNamesList[self.module - 1]),
             qType,
             self.question,
             self.answer,
-            optStr
+            optStr,
+            self.feedback
         ]
-        db.cursor.execute('INSERT INTO questions (module, qType, question, answer, options) VALUES (?,?,?,?,?)', question)
+        db.cursor.execute('INSERT INTO questions (module, qType, question, answer, options, feedback) VALUES (?,?,?,?,?,?)', question)
         db.conn.commit()
 
 
 # Multiple Choice Question Subclass -> MakeQuestion
 class MakeMCQ(MakeQuestion):
-    def __init__(self, module, type, question, answer, options, maxAnswers):
+    def __init__(self, module, type, question, answer, options, maxAnswers, feedback, wrong_count):
         #  inherit parent attributes
-        super(MakeMCQ, self).__init__(module, type, question, answer, options)
+        super(MakeMCQ, self).__init__(module, type, question, answer, options, feedback, wrong_count)
         self.maxAnswers = maxAnswers
 
     # Allow user to input fake answers
@@ -43,18 +47,18 @@ class MakeMCQ(MakeQuestion):
 
 # True False question subclass
 class MakeTF(MakeQuestion):
-    def __init__(self, module, type, question, answer, options):
-        super(MakeTF, self).__init__(module, type, question, answer, options)
+    def __init__(self, module, type, question, answer, options, feedback, wrong_count):
+        super(MakeTF, self).__init__(module, type, question, answer, options, feedback, wrong_count)
 
     def true_or_false(self):
         self.answer = input("Is your statement True or False? ")
         # make GUI for choices
         self.options=["True","False"]
 
-
+# Best Match question subclass
 class MakeBM(MakeQuestion):
-    def __init__(self, module, type, matches, maxTerms):
-        super(MakeBM,self).__init__(module, None, None, None, None)
+    def __init__(self, module, type, matches, maxTerms, feedback, wrong_count):
+        super(MakeBM,self).__init__(module, None, None, None, None, feedback, wrong_count)
         self.type = type
         self.matches = []
         self.terms = []
@@ -118,19 +122,19 @@ def choose_question_type():
 
 
 def multiple_choice(module, question, answer):
-    question_instance = MakeMCQ(module, 1, question, answer, None, None)  # Instantiation
+    question_instance = MakeMCQ(module, 1, question, answer, None, None, None, None)  # Instantiation
     question_instance.make_dummy_answer()
     print(f'this question is for {db.moduleNamesList[question_instance.module - 1]}')
     question_instance.insert_data(1)
 
 def true_false(module, question):
-    question_instance = MakeTF(module, 2, question, None, None)  # Instantiation
+    question_instance = MakeTF(module, 2, question, None, None, None, None)  # Instantiation
     question_instance.true_or_false()
     print(f'this question is for {db.moduleNamesList[question_instance.module - 1]}')
     question_instance.insert_data(2)
 
 
 def best_match(module):
-    question_instance = MakeBM(module, 3, None, None)
+    question_instance = MakeBM(module, 3, None, None, None, None)
     question_instance.make_match()
     question_instance.insert_data()

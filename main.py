@@ -1,7 +1,7 @@
 import ModuleSetup
 import QuestionSetup
 import Database as db
-
+import GUI
 
 def admin_features():
     i = True
@@ -21,12 +21,3 @@ def admin_features():
         else:
             print("Invalid choice")
     exit()
-
-
-admin_features()
-
-#  ADD CHOICE TO PICK MODULE FOR QUESTIONS
-
-#  MAKE BEST MATCH
-
-#  MAKE GUI

@@ -14,10 +14,8 @@ class MakeModule:
         db.conn.commit()
 
 
-def create_module():
-    name = input("What is the name of the module: ")
-    description = input("Enter a short description: ")
-    ModuleInstance = MakeModule(name, description)
+def create_module(name, desc):
+    ModuleInstance = MakeModule(name, desc)
     ModuleInstance.insert_data()
     print("Module Inserted")
     

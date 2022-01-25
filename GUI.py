@@ -17,7 +17,6 @@ takeQuiz = Frame(win)
 adminTools = Frame(win)
 moduleSetup = Frame(win)
 QuestionSetup = Frame(win)
-multipleChoiceSetup = Frame(win)
 
 def addToDatabase(*args):
     #   Do this for module Insert
@@ -26,28 +25,28 @@ def addToDatabase(*args):
     #   Do this for Question insert
     #   Multiple Choice
     elif (len(args) != 2) and clicked.get() == qs.questionTypes[0]:
-        print(getValues[1,4])
-        qs.multiple_choice((getValues[1]),getValues[2],getValues[3],getValues[4])
+        qs.multiple_choice(args[0],args[1],args[2],args[3])
     #   True False
     elif (len(args) != 2) and clicked.get() == qs.questionTypes[1]:
-        pass
+        qs.true_false(args[0],args[1],args[2],args[3])
     #   Best Match
     else:
-        pass
+        qs.best_match(args[0],args[1],args[2])
 
-def differenciateQuestion(type,ans):
+def differenciateQuestion(type,module,ques,ans):
+    print(type)
+    answerList = [ans]
     if type == qs.questionTypes[0]:
-
-
         def addAnswer():
-            if len(answerList) < 5:
+            if len(answerList) < 4:
                 answerList.append(falseAnswer.get())
                 Label(possibleAns,text=falseAnswer.get()).pack()
             else:
-                getValues.append(answerList)
-                addToDatabase(getValues,answerList,None)
+                ansListStr = '/'.join(answerList)
+                print(ansListStr)
+                addToDatabase(module,ques,ans,str(ansListStr))
+                possibleAns.destroy()
 
-        answerList = [ans]
         falseAnswerCount = 1
 
         possibleAns = Tk()
@@ -65,12 +64,68 @@ def differenciateQuestion(type,ans):
 
         possibleAns.mainloop()
 
-        swap(multipleChoiceSetup)
+    elif type == qs.questionTypes[1]:
+        confirm = Tk()
+        confirm.title("TRUE/FALSE")
+        confirm.geometry("300x100")
+        
+        def addAnswer():
+            if (ans == "True"):
+                answerList.append("False")
+                ansListStr = '/'.join(answerList)
+                addToDatabase(module,ques,ans,str(ansListStr))
+                confirm.destroy()
+            elif (ans == "False"):
+                answerList.append("True")
+                answerList.append("False")
+                ansListStr = '/'.join(answerList)
+                addToDatabase(module,ques,ans,str(ansListStr))
+                confirm.destroy()
+            else:
+                Label(confirm, text=f"{ans} is not True/False").pack()
+                Button(confirm,text='Back',command= lambda: confirm.destroy()).pack()
+
+        Label(confirm, text=f"The statement is {ans}?").pack()
+        nextButton = Button(confirm,text='Next',command= addAnswer).pack()
+        
+        confirm.mainloop()
+    else:
+        termList = []
+        defList = []
+        makeTerms = Tk()
+        makeTerms.title("BEST MATCH")
+
+        Label(makeTerms, text=f"Term: ").pack()
+        termInput = Entry(makeTerms, width=50, borderwidth=5)
+        termInput.pack()
+        Label(makeTerms, text=f"Definition: ").pack()
+        defInput = Entry(makeTerms, width=50, borderwidth=5)
+        defInput.pack()
+
+        def addAnswer():
+            if len(termList) < 4:
+                termList.append(termInput.get())
+                defList.append(defInput.get())
+                Label(makeTerms,text=f'{termInput.get()} -> {defInput.get()}')
+            else:
+                termListStr = '/'.join(termList)
+                defListStr = '/'.join(defList)
+                addToDatabase(module,termListStr,defListStr)
+                makeTerms.destroy()
+
+        nextButton = Button(makeTerms,text='Next',command= addAnswer).pack()
+
+        makeTerms.mainloop()
+
 
 def swap(frame):
     frame.tkraise()
 
-for frame in (mainMenu, takeQuiz, adminTools,moduleSetup,QuestionSetup,multipleChoiceSetup):
+for frame in (mainMenu, 
+            takeQuiz, 
+            adminTools,
+            moduleSetup,
+            QuestionSetup):
     frame.grid(row=0,column=0, sticky='news')
 
 #----------------------------------------------------
@@ -105,12 +160,12 @@ Button(moduleSetup, text="Back", command= lambda:swap(adminTools)).pack()
 clicked = StringVar()
 clicked.set(qs.questionTypes[0])
 chosenModule = StringVar()
-chosenModule.set(db.moduleNamesList[0])
+chosenModule.set("Choose Module")
 
 qTypeLabel = Label(QuestionSetup,text="Choose Question Type").pack()
 qTypeOptions = OptionMenu(QuestionSetup, clicked, *qs.questionTypes)
 qTypeOptions.pack()
-
+swap(moduleSetup)
 qModuleLabel = Label(QuestionSetup,text="What Module Is This Question For?").pack()
 qModule = OptionMenu(QuestionSetup, chosenModule, *db.moduleNamesList)
 qModule.pack()
@@ -121,21 +176,11 @@ ansLabel = Label(QuestionSetup, text="Answer").pack()
 ans = Entry(QuestionSetup, width=50,borderwidth=5)
 ans.pack()
 
-getValues =[
-    clicked.get(),
-    chosenModule.get(),
-    ques.get(),
-    ans.get()
-]
-
-Button(QuestionSetup,text="Next",command= lambda: differenciateQuestion(clicked.get(),ans.get())).pack()
+Button(QuestionSetup,text="Next",command= lambda: differenciateQuestion(clicked.get(),
+                                                                    chosenModule.get(),
+                                                                    ques.get(),
+                                                                    ans.get())).pack()
 Button(QuestionSetup,text="Back",command= lambda: swap(mainMenu)).pack()
-
-#----------------------------------------------------
-#   MCQ SETUP QAGE
-multiChoiceLabel = Label(multipleChoiceSetup,text='MULTIPLE CHOICE').pack()
-
-
 
 
 exitButton.pack()

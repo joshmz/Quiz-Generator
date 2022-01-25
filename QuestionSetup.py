@@ -19,7 +19,7 @@ class MakeQuestion:
     def insert_data(self,qType):
         optStr = ','.join(self.options) # Clean up string
         question = [
-            str(*db.moduleNamesList[self.module - 1]),
+            self.module,
             qType,
             self.question,
             self.answer,
@@ -121,10 +121,8 @@ def choose_question_type():
         best_match(module_input)
 
 
-def multiple_choice(module, question, answer):
-    question_instance = MakeMCQ(module, 1, question, answer, None, None, None, None)  # Instantiation
-    question_instance.make_dummy_answer()
-    print(f'this question is for {db.moduleNamesList[question_instance.module - 1]}')
+def multiple_choice(module, question, answer, options):
+    question_instance = MakeMCQ(module, 1, question, answer, options, None, None, None)  # Instantiation
     question_instance.insert_data(1)
 
 def true_false(module, question):

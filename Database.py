@@ -43,6 +43,9 @@ cursor.execute(results_table)
 cursor.execute('SELECT module_ID,moduleName FROM modules')
 moduleList = cursor.fetchall()
 
+#   GET MODULE ID
+cursor.execute('SELECT module_ID FROM modules')
+moduleIDs = cursor.fetchall()
 
 #  JUST MODULE NAMES
 cursor.execute('SELECT moduleName FROM modules')

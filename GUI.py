@@ -26,7 +26,8 @@ def addToDatabase(*args):
     #   Do this for Question insert
     #   Multiple Choice
     elif (len(args) != 2) and clicked.get() == qs.questionTypes[0]:
-        qs.multiple_choice(getValues[1],getValues[2],getValues[3])
+        print(getValues[1,4])
+        qs.multiple_choice((getValues[1]),getValues[2],getValues[3],getValues[4])
     #   True False
     elif (len(args) != 2) and clicked.get() == qs.questionTypes[1]:
         pass
@@ -37,21 +38,31 @@ def addToDatabase(*args):
 def differenciateQuestion(type,ans):
     if type == qs.questionTypes[0]:
 
+
+        def addAnswer():
+            if len(answerList) < 5:
+                answerList.append(falseAnswer.get())
+                Label(possibleAns,text=falseAnswer.get()).pack()
+            else:
+                getValues.append(answerList)
+                addToDatabase(getValues,answerList,None)
+
         answerList = [ans]
         falseAnswerCount = 1
 
         possibleAns = Tk()
         possibleAns.title("MULTIPLE CHOICE")
-        possibleAns.geometry("400x100")
 
         Label(possibleAns,text=f"Enter A False Answer: ({falseAnswerCount})").pack()
         falseAnswer = Entry(possibleAns, width=50,borderwidth=5)
         falseAnswer.pack()
-        nextButton = Button(possibleAns,text='Next').pack()
+
+        nextButton = Button(possibleAns,text='Next',command= addAnswer).pack()
+
         
-        Label(possibleAns,text="Possible Answers").pack()
-        for i in answerList:
-            Label(possibleAns,text=i).pack()
+        Label(possibleAns,text=answerList[0]).pack()
+
+
         possibleAns.mainloop()
 
         swap(multipleChoiceSetup)
@@ -116,6 +127,7 @@ getValues =[
     ques.get(),
     ans.get()
 ]
+
 Button(QuestionSetup,text="Next",command= lambda: differenciateQuestion(clicked.get(),ans.get())).pack()
 Button(QuestionSetup,text="Back",command= lambda: swap(mainMenu)).pack()
 
